@@ -11,13 +11,13 @@ import org.jsoup.Jsoup;
 import org.jsoup.select.Elements;
 
 import java.io.IOException;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import rx.Emitter;
-import rx.Observable;
-import rx.functions.Action1;
+import io.reactivex.Observable;
 
 /**
  * Created by aritraroy on 09/02/17.
@@ -38,32 +38,29 @@ public class RxMagnetoInternal {
      */
     static Observable<Boolean> isPackageUrlValid(final Context context,
                                                  final String packageName) {
-        return Observable.fromEmitter(new Action1<Emitter<Boolean>>() {
-            @Override
-            public void call(Emitter<Boolean> emitter) {
-                try {
-                    if (Connectivity.isConnected(context)) {
-                        Connection.Response response = Jsoup.connect(MARKET_PLAY_STORE_URL + packageName)
-                                .timeout(DEFAULT_TIMEOUT)
-                                .ignoreHttpErrors(true)
-                                .referrer("http://www.google.com").execute();
+        return Observable.create(emitter -> {
+            try {
+                if (Connectivity.isConnected(context)) {
+                    Connection.Response response = Jsoup.connect(MARKET_PLAY_STORE_URL + packageName)
+                            .timeout(DEFAULT_TIMEOUT)
+                            .ignoreHttpErrors(true)
+                            .referrer("http://www.google.com").execute();
 
-                        if (response.statusCode() == 200) {
-                            emitter.onNext(true);
-                            emitter.onCompleted();
-                        } else {
-                            emitter.onError(new RxMagnetoException("Package url is not valid."));
-                        }
+                    if (response.statusCode() == 200) {
+                        emitter.onNext(true);
+                        emitter.onComplete();
                     } else {
-                        emitter.onError(new NetworkNotAvailableException("Internet connection is not available."));
+                        emitter.onError(new RxMagnetoException("Package url is not valid."));
                     }
-                } catch (MalformedURLException e) {
-                    emitter.onError(new RxMagnetoException("Package url is malformed."));
-                } catch (IOException e) {
-                    emitter.onError(e);
+                } else {
+                    emitter.onError(new NetworkNotAvailableException("Internet connection is not available."));
                 }
+            } catch (MalformedURLException e) {
+                emitter.onError(new RxMagnetoException("Package url is malformed."));
+            } catch (IOException e) {
+                emitter.onError(e);
             }
-        }, Emitter.BackpressureMode.LATEST);
+        });
     }
 
     /**
@@ -76,29 +73,26 @@ public class RxMagnetoInternal {
      */
     static Observable<String> getPlayStoreInfo(final Context context, final String packageName,
                                                final String tag) {
-        return Observable.fromEmitter(new Action1<Emitter<String>>() {
-            @Override
-            public void call(Emitter<String> emitter) {
-                String parsedData;
-                try {
-                    if (Connectivity.isConnected(context)) {
-                        parsedData = Jsoup.connect(MARKET_PLAY_STORE_URL + packageName)
-                                .timeout(DEFAULT_TIMEOUT)
-                                .ignoreHttpErrors(true)
-                                .referrer("http://www.google.com").get()
-                                .select("div[itemprop=" + tag + "]").first()
-                                .ownText();
+        return Observable.create(emitter -> {
+            String parsedData;
+            try {
+                if (Connectivity.isConnected(context)) {
+                    parsedData = Jsoup.connect(MARKET_PLAY_STORE_URL + packageName)
+                            .timeout(DEFAULT_TIMEOUT)
+                            .ignoreHttpErrors(true)
+                            .referrer("http://www.google.com").get()
+                            .select("div[itemprop=" + tag + "]").first()
+                            .ownText();
 
-                        emitter.onNext(parsedData);
-                        emitter.onCompleted();
-                    } else {
-                        emitter.onError(new NetworkNotAvailableException("Internet connection is not available."));
-                    }
-                } catch (Exception e) {
-                    emitter.onError(e);
+                    emitter.onNext(parsedData);
+                    emitter.onComplete();
+                } else {
+                    emitter.onError(new NetworkNotAvailableException("Internet connection is not available."));
                 }
+            } catch (Exception e) {
+                emitter.onError(e);
             }
-        }, Emitter.BackpressureMode.LATEST);
+        });
     }
 
     /**
@@ -111,29 +105,26 @@ public class RxMagnetoInternal {
      */
     static Observable<String> getPlayStoreAppRating(final Context context, final String packageName,
                                                     final String tag) {
-        return Observable.fromEmitter(new Action1<Emitter<String>>() {
-            @Override
-            public void call(Emitter<String> emitter) {
-                String parsedData;
-                try {
-                    if (Connectivity.isConnected(context)) {
-                        parsedData = Jsoup.connect(MARKET_PLAY_STORE_URL + packageName)
-                                .timeout(DEFAULT_TIMEOUT)
-                                .ignoreHttpErrors(true)
-                                .referrer("http://www.google.com").get()
-                                .select("div[class=" + tag + "]").first()
-                                .ownText();
+        return Observable.create(emitter -> {
+            String parsedData;
+            try {
+                if (Connectivity.isConnected(context)) {
+                    parsedData = Jsoup.connect(MARKET_PLAY_STORE_URL + packageName)
+                            .timeout(DEFAULT_TIMEOUT)
+                            .ignoreHttpErrors(true)
+                            .referrer("http://www.google.com").get()
+                            .select("div[class=" + tag + "]").first()
+                            .ownText();
 
-                        emitter.onNext(parsedData);
-                        emitter.onCompleted();
-                    } else {
-                        emitter.onError(new NetworkNotAvailableException("Internet connection is not available."));
-                    }
-                } catch (Exception e) {
-                    emitter.onError(e);
+                    emitter.onNext(parsedData);
+                    emitter.onComplete();
+                } else {
+                    emitter.onError(new NetworkNotAvailableException("Internet connection is not available."));
                 }
+            } catch (Exception e) {
+                emitter.onError(e);
             }
-        }, Emitter.BackpressureMode.LATEST);
+        });
     }
 
     /**
@@ -147,29 +138,26 @@ public class RxMagnetoInternal {
     static Observable<String> getPlayStoreAppRatingsCount(final Context context,
                                                           final String packageName,
                                                           final String tag) {
-        return Observable.fromEmitter(new Action1<Emitter<String>>() {
-            @Override
-            public void call(Emitter<String> emitter) {
-                String parsedData;
-                try {
-                    if (Connectivity.isConnected(context)) {
-                        parsedData = Jsoup.connect(MARKET_PLAY_STORE_URL + packageName)
-                                .timeout(DEFAULT_TIMEOUT)
-                                .ignoreHttpErrors(true)
-                                .referrer("http://www.google.com").get()
-                                .select("span[class=" + tag + "]").first()
-                                .ownText();
+        return Observable.create(emitter -> {
+            String parsedData;
+            try {
+                if (Connectivity.isConnected(context)) {
+                    parsedData = Jsoup.connect(MARKET_PLAY_STORE_URL + packageName)
+                            .timeout(DEFAULT_TIMEOUT)
+                            .ignoreHttpErrors(true)
+                            .referrer("http://www.google.com").get()
+                            .select("span[class=" + tag + "]").first()
+                            .ownText();
 
-                        emitter.onNext(parsedData);
-                        emitter.onCompleted();
-                    } else {
-                        emitter.onError(new NetworkNotAvailableException("Network not available"));
-                    }
-                } catch (Exception e) {
-                    emitter.onError(e);
+                    emitter.onNext(parsedData);
+                    emitter.onComplete();
+                } else {
+                    emitter.onError(new NetworkNotAvailableException("Network not available"));
                 }
+            } catch (Exception e) {
+                emitter.onError(e);
             }
-        }, Emitter.BackpressureMode.LATEST);
+        });
     }
 
     /**
@@ -182,33 +170,30 @@ public class RxMagnetoInternal {
      */
     static Observable<ArrayList<String>> getPlayStoreRecentChangelogArray(final Context context,
                                                                           final String packageName) {
-        return Observable.fromEmitter(new Action1<Emitter<ArrayList<String>>>() {
-            @Override
-            public void call(Emitter<ArrayList<String>> emitter) {
-                Elements elements;
-                try {
-                    if (Connectivity.isConnected(context)) {
-                        elements = Jsoup.connect(MARKET_PLAY_STORE_URL + packageName)
-                                .timeout(DEFAULT_TIMEOUT)
-                                .ignoreHttpErrors(true)
-                                .referrer("http://www.google.com").get()
-                                .select(".recent-change");
+        return Observable.create(emitter -> {
+            Elements elements;
+            try {
+                if (Connectivity.isConnected(context)) {
+                    elements = Jsoup.connect(MARKET_PLAY_STORE_URL + packageName)
+                            .timeout(DEFAULT_TIMEOUT)
+                            .ignoreHttpErrors(true)
+                            .referrer("http://www.google.com").get()
+                            .select(".recent-change");
 
-                        int elementSize = elements.size();
-                        String[] parsedDataArray = new String[elementSize];
-                        for (int i = 0; i < elementSize; i++) {
-                            parsedDataArray[i] = elements.get(i).ownText();
-                        }
-
-                        emitter.onNext(new ArrayList<>(Arrays.asList(parsedDataArray)));
-                        emitter.onCompleted();
-                    } else {
-                        emitter.onError(new NetworkNotAvailableException("Internet connection is not available."));
+                    int elementSize = elements.size();
+                    String[] parsedDataArray = new String[elementSize];
+                    for (int i = 0; i < elementSize; i++) {
+                        parsedDataArray[i] = elements.get(i).ownText();
                     }
-                } catch (Exception e) {
-                    emitter.onError(e);
+
+                    emitter.onNext(new ArrayList<>(Arrays.asList(parsedDataArray)));
+                    emitter.onComplete();
+                } else {
+                    emitter.onError(new NetworkNotAvailableException("Internet connection is not available."));
                 }
+            } catch (Exception e) {
+                emitter.onError(e);
             }
-        }, Emitter.BackpressureMode.LATEST);
+        });
     }
 }
