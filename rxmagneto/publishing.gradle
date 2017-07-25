@@ -1,0 +1,28 @@
+group projectGroupId
+
+apply plugin: 'maven-publish'
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId group
+            artifactId projectArtifactId
+            version '1.1.5'
+
+            artifact(sourceJar)
+            artifact("$buildDir/outputs/aar/${project.name}-release.aar")
+        }
+    }
+    repositories {
+        maven {
+            url "$buildDir/repo"
+        }
+        maven {
+            credentials {
+                username 'deployment'
+                password 'md38kHO'
+            }
+            url "http://nexus.mycoachfootball.com/content/repositories/releases"
+        }
+    }
+}
