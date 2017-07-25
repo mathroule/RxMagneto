@@ -17,7 +17,7 @@ ext {
     siteUrl = 'https://github.com/aritraroy/RxMagneto'
     gitUrl = 'https://github.com/aritraroy/RxMagneto.git'
 
-    libraryVersion = '1.1.5'
+    libraryVersion = '1.1.6'
 
     developerId = 'aritraroy'
     developerName = 'Aritra Roy'

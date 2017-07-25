@@ -7,7 +7,7 @@ publishing {
         maven(MavenPublication) {
             groupId group
             artifactId projectArtifactId
-            version '1.1.5'
+            version '1.1.6'
 
             artifact(sourceJar)
             artifact("$buildDir/outputs/aar/${project.name}-release.aar")
